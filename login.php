@@ -46,7 +46,7 @@ if (isset($_POST['username'])) {
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url(bg1.jpeg);
+            background-image: url(bg.jpg);
             background-size: 1366px 768px;
             background-repeat: no-repeat;
             background-attachment: fixed;

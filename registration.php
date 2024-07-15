@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
     <title>Register</title>
     <style>
         body{
-            background-image: url(bg1.jpeg);
+            background-image: url(bg.jpg);
             background-size: 1366px 768px;
             background-repeat: no-repeat;
             background-attachment: fixed;
