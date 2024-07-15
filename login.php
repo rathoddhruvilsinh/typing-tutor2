@@ -46,8 +46,11 @@ if (isset($_POST['username'])) {
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: rgb(255,0,151);
-            background: linear-gradient(302deg, rgba(255,0,151,1) 0%, rgba(255,176,147,1) 50%);
+            background-image: url(bg1.jpeg);
+            background-size: 1366px 768px;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -55,17 +58,18 @@ if (isset($_POST['username'])) {
         }
 
         .form {
-            background-color: #ffffff65;
+            background-color: transparent;
+            backdrop-filter: blur(2px);
             padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.582);
+            border-radius: 9px;
+            box-shadow: 0 1px 5px rgb(255, 255, 255);
             width: 100%;
             max-width: 400px;
         }
 
         .login-title {
             font-size: 24px;
-            color: rgb(0, 0, 0);
+            color: #ffffff;
             margin-bottom: 20px;
             text-align: center;
         }
@@ -101,7 +105,7 @@ if (isset($_POST['username'])) {
             text-align: center;
             margin-top: 10px;
             font-size: 14px;
-            color: #000000;
+            color: #ffffff;
         }
 
         .link a {

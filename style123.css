@@ -2,8 +2,11 @@
 
 .body {
     font-family: Arial, sans-serif;
-    background: rgb(255,0,151);
-    background: linear-gradient(302deg, rgba(255,0,151,1) 0%, rgba(255,176,147,1) 50%);
+    background-image: url(bg1.jpeg);
+    background-size: 1366px 768px;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
     margin: 0;
     padding: 0;
     display: flex;
@@ -13,7 +16,8 @@
 }
 
 .form {
-    background-color: #ffffff;
+    background-color: transparent;
+    backdrop-filter: blur(2px);
     padding: 40px;
     border-radius: 8px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);

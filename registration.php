@@ -57,6 +57,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <title>Register</title>
     <style>
+        body{
+            background-image: url(bg1.jpeg);
+            background-size: 1366px 768px;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+        }
+
+        .form {
+            background-color: transparent;
+            backdrop-filter: blur(2px);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgb(255, 255, 255);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        label {
+    display: block;
+    margin-bottom: 5px;
+    color: #ffffff;
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #ffffff;
+}
+
         .error-message {
             color: red;
             font-size: 0.9em;

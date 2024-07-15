@@ -61,8 +61,8 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
 
         header h1 {
             font-size: 1.8rem;
-            font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif
-            color: #000000;
+            font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            color: #ffffff;
             margin-left: 30px;
             margin-bottom: 1px;
             margin-top: 1px;
@@ -93,7 +93,7 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
 
         .username {
             font-size: 0.9rem;
-            color: #000000;
+            color: #ffffff;
             margin-right: 15px;
             padding: 5px 10px;
             border-radius: 5px;

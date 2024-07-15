@@ -59,8 +59,11 @@ if (isset($_POST['otp'])) {
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background: rgb(255,0,151);
-            background: linear-gradient(302deg, rgba(255,0,151,1) 0%, rgba(255,176,147,1) 50%);
+            background-image: url(bg1.jpeg);
+            background-size: 1366px 768px;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;        
             display: flex;
             justify-content: center;
             align-items: center;
@@ -70,7 +73,8 @@ if (isset($_POST['otp'])) {
         }
 
         .form {
-            background-color: #ffffff;
+            background-color: transparent;
+            backdrop-filter: blur(2px);
             padding: 40px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -79,7 +83,7 @@ if (isset($_POST['otp'])) {
         }
 
         .login-title {
-            color: #333;
+            color: #ffffff;
             font-size: 24px;
             margin-bottom: 20px;
             text-align: center;
@@ -102,7 +106,7 @@ if (isset($_POST['otp'])) {
         }
 
         .login-button {
-            width: 100%;
+            width: 107%;
             padding: 12px;
             background-color: #1876f2;
             color: white;
@@ -139,11 +143,11 @@ if (isset($_POST['otp'])) {
         p {
             text-align: center;
             margin-top: 20px;
-            color: #666;
+            color: #ffffff;
         }
 
         a {
-            color: #007bff;
+            color: #ffffff;
             text-decoration: none;
         }
 
