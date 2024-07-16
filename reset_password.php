@@ -66,7 +66,9 @@ if (isset($_POST['submit']) && isset($_POST['password']) && isset($_POST['confir
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     
-    if ($password === $confirm_password) {
+    if ($password !== $confirm_password) {
+        $error_message = "Passwords do not match.";
+    } else {
         if (isset($_SESSION['reset_email']) && isset($_SESSION['reset_token'])) {
             $email = $_SESSION['reset_email'];
             $token = $_SESSION['reset_token'];
@@ -103,8 +105,6 @@ if (isset($_POST['submit']) && isset($_POST['password']) && isset($_POST['confir
             $error_message = "Reset email not found in session. Please try the reset link again.";
             error_log("Reset email not found in session when attempting to reset password");
         }
-    } else {
-        $error_message = "Passwords do not match.";
     }
 }
 ?>
@@ -115,6 +115,16 @@ if (isset($_POST['submit']) && isset($_POST['password']) && isset($_POST['confir
     <meta charset="utf-8"/>
     <title>Reset Password</title>
     <link rel="stylesheet" href="style1.css">
+    <style>
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+        .success-message {
+            color: green;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <form class="form" method="post">
@@ -123,7 +133,7 @@ if (isset($_POST['submit']) && isset($_POST['password']) && isset($_POST['confir
         if ($error_message) echo "<p class='error-message'>$error_message</p>";
         if ($success_message) echo "<p class='success-message'>$success_message</p>";
         ?>
-        <?php if (isset($_SESSION['reset_email']) && isset($_SESSION['reset_token']) && !$error_message && !$success_message): ?>
+        <?php if (isset($_SESSION['reset_email']) && isset($_SESSION['reset_token']) && !$success_message): ?>
             <input type="password" class="login-input" name="password" placeholder="New Password" required>
             <input type="password" class="login-input" name="confirm_password" placeholder="Confirm New Password" required>
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
