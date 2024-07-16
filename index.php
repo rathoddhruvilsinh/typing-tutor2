@@ -37,14 +37,57 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
             font-family: 'Roboto', sans-serif;
             margin: 0;
             background-image: url(bg.jpg);
-            background-size: 1366px 768px;
+            background-size: cover;
+            background-position: center center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-position: center;
             color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
+        }
+
+        #mask-intro {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url(bg.jpg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .mask-content {
+            text-align: center;
+            color: #ffffff;
+            transform: scale(0.8);
+            transition: transform 0.1s ease-out;
+        }
+
+        .mask-content h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .mask-content p {
+            font-size: 1.5rem;
+            color: #22223b;
+        }
+
+        #mask-intro.hide {
+            opacity: 0;
+            transform: scale(1.2);
+            pointer-events: none;
+        }
+
+        #mask-intro.hide .mask-content {
+            transform: scale(0.8);
         }
 
         header {
@@ -61,7 +104,7 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
 
         header h1 {
             font-size: 1.8rem;
-            font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
             color: #ffffff;
             margin-left: 30px;
             margin-bottom: 1px;
@@ -141,27 +184,27 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
                 margin-right: 10px;
                 border-radius: 5px
             }
-
+            
             header nav {
                 display: none;
                 width: 100%;
                 flex-direction: column;
                 align-items: flex-start;
                 padding: 10px;
-                background-color: #ffffff;
+                background-color: transparent;
             }
 
             header nav.show {
                 display: flex;
             }
 
-            nav .welcome{
+            nav .welcome {
                 color: black;
                 margin-bottom: 0;
             }
 
-             header nav #username-display {
-               margin-bottom: 30px;
+            header nav #username-display {
+                margin-bottom: 30px;
                 margin-left: 145px;
                 color: #000000;
             }
@@ -203,9 +246,8 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
             max-width: 500px;
             padding: 10px;
             background-color: transparent;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(3px);
             border-radius: 10px;
-            /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
         }
 
         .card {
@@ -279,35 +321,34 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
         }
 
         .history-container {
-    width: 100%;
-    max-width: 600px;
-    margin-top: 20px;
-    background-color: transparent;
-    backdrop-filter: blur(8px);
-    border-radius: 10px;
-    /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
-    padding: 20px;
-    box-sizing: border-box;
-}
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+            background-color: transparent;
+            backdrop-filter: blur(3px);
+            border-radius: 10px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-.history-container h2 {
-    font-size: 1.2rem;
-    color: var(--primary-color);
-    margin-bottom: 10px;
-}
+        .history-container h2 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
 
-#history-list {
-    list-style-type: none;
-    padding: 0;
-}
+        #history-list {
+            list-style-type: none;
+            padding: 0;
+        }
 
-#history-list li {
-    background-color:#ffffff;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    font-size: 0.9rem;
-}
+        #history-list li {
+            background-color: #ffffff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
 
         .popup {
             position: fixed;
@@ -511,6 +552,15 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
     </style>
 </head>
 <body>
+<div id="loader-wrapper">
+        <div id="loader"></div>
+    </div>
+    <div id="mask-intro">
+        <div class="mask-content">
+            <h1>Welcome, <span id="mask-username"></span>!</h1>
+            <p>Get ready to improve your typing skills</p>
+        </div>
+    </div>
     <header>
         <h1>TYPING PRACTICE TUTOR</h1>
         <div class="hamburger-menu">
@@ -519,7 +569,7 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
             <div class="bar"></div>
         </div>
         <nav>
-        <span class="username">Welcome, <?php echo htmlspecialchars($username); ?></span>
+            <span class="username">Welcome, <?php echo htmlspecialchars($username); ?></span>
             <button id="logout-btn">Logout</button>
         </nav>
     </header>
@@ -558,7 +608,7 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
                 <button class="restart-btn" id="restart-btn">Restart</button>
             </div>
         </div>
-        
+
         <div class="history-container">
             <h2>Your Typing History</h2>
             <ul id="history-list"></ul>
@@ -567,6 +617,21 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Mask intro animation
+            const maskIntro = document.getElementById('mask-intro');
+            const maskUsername = document.getElementById('mask-username');
+            maskUsername.textContent = '<?php echo htmlspecialchars($username); ?>';
+
+            setTimeout(() => {
+                maskIntro.classList.add('hide');
+            }, 2000);
+
+            maskIntro.addEventListener('transitionend', () => {
+                if (maskIntro.classList.contains('hide')) {
+                    maskIntro.style.display = 'none';
+                }
+            });
+
             const texts = [
                 "The quick brown efficiency fox jumps over the lazy dog.",
                 "A journey of a thousand miles begins with a single step.",
@@ -750,7 +815,6 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
                 popupCPM.textContent = cpm;
                 popupAccuracy.textContent = accuracy.toFixed(2) + '%';
                 resultPopup.style.display = 'block';
-
             }           
 
             function endTypingSession() {
@@ -763,12 +827,12 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
                 const { wpm, cpm } = calculateWPMAndCPM(typedCharacters, timeInMinutes);
                 const accuracy = totalCharacters > 0 ? ((totalCharacters - totalErrors) / totalCharacters) * 100 : 0;
                 displayPopup(timeInMinutes * 60, totalErrors, wpm, cpm);
-    
+
                 // Save result and update history
                 saveResult(wpm, cpm, accuracy, totalErrors, timeInMinutes * 60);
                 updateHistory(wpm, cpm, accuracy, totalErrors, timeInMinutes * 60);
             }    
-            
+
             function saveResult(wpm, cpm, accuracy, errors, time) {
                 fetch('save_result.php', {
                     method: 'POST',
@@ -857,38 +921,48 @@ $userId = $username !== 'Guest' ? getUserId($username) : null;
 
             startPractice();
             fetchHistory();
+
+            // Add this new code for the loading animation
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    document.body.classList.add('loaded');
+                    setTimeout(() => {
+                        document.getElementById('loader-wrapper').style.display = 'none';
+                    }, 500);
+                }, 1000);
+            });
         });
+
         function fetchHistory() {
-                fetch('get_history.php')
-                .then(response => response.json())
-                .then(data => {
-                    const historyList = document.getElementById('history-list');
-                    historyList.innerHTML = '';
-                    if (data.error) {
-                        console.error('Error fetching history:', data.error);
+            fetch('get_history.php')
+            .then(response => response.json())
+            .then(data => {
+                const historyList = document.getElementById('history-list');
+                historyList.innerHTML = '';
+                if (data.error) {
+                    console.error('Error fetching history:', data.error);
+                    const li = document.createElement('li');
+                    li.textContent = 'Error fetching history. Please try again later.';
+                    historyList.appendChild(li);
+                } else if (data.length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = 'No history available. Complete a typing session to see your results.';
+                    historyList.appendChild(li);
+                } else {
+                    data.forEach(result => {
                         const li = document.createElement('li');
-                        li.textContent = 'Error fetching history. Please try again later.';
+                        li.textContent = `WPM: ${result.wpm}, CPM: ${result.cpm}, Accuracy: ${result.accuracy}%, Errors: ${result.errors}, Time: ${parseFloat(result.time).toFixed(2)}s`;
                         historyList.appendChild(li);
-                    } else if (data.length === 0) {
-                        const li = document.createElement('li');
-                        li.textContent = 'No history available. Complete a typing session to see your results.';
-                        historyList.appendChild(li);
-                    } else {
-                        data.forEach(result => {
-                            const li = document.createElement('li');
-                            li.textContent = `WPM: ${result.wpm}, CPM: ${result.cpm}, Accuracy: ${result.accuracy}%, Errors: ${result.errors}, Time: ${parseFloat(result.time).toFixed(2)}s`;
-                            historyList.appendChild(li);
-                        });
-                    }
-                })
-                .catch((error) => {
-                    console.error('Fetch error:', error);
-                    const historyList = document.getElementById('history-list');
-                    historyList.innerHTML = '<li>Error fetching history. Please try again later.</li>';
-                });
-            } 
-            fetchHistory();    
-            
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('Fetch error:', error);
+                const historyList = document.getElementById('history-list');
+                historyList.innerHTML = '<li>Error fetching history. Please try again later.</li>';
+            });
+        } 
+        fetchHistory();    
     </script>
 </body>
 </html>

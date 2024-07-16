@@ -49,83 +49,150 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style12.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <title>Register</title>
     <style>
-        body{
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
             background-image: url(bg.jpg);
-            background-size: 1366px 768px;
+            background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .form {
-            background-color: transparent;
-            backdrop-filter: blur(2px);
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgb(255, 255, 255);
+            box-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+            width: 100%;
+            max-width: 400px;
         }
 
         h1 {
             text-align: center;
             color: #ffffff;
             margin-bottom: 20px;
+            font-size: 24px;
         }
 
         label {
-    display: block;
-    margin-bottom: 5px;
-    color: #ffffff;
-}
-
-footer {
-    text-align: center;
-    margin-top: 20px;
-    color: #ffffff;
-}
-
-        .error-message {
-            color: red;
-            font-size: 0.9em;
-            margin-top: 5px;
+            display: block;
+            margin-bottom: 5px;
+            color: #ffffff;
         }
-        .password-container {
-            position: relative;
-        }
-        .password-container .fa-eye, .password-container .fa-eye-slash {
-            position: absolute;
-            top: 72%;
-            right: 10px;
-            transform: translateY(-50%);
-            cursor: pointer;
-        }       
-        /* Added CSS for phone input */
-        input[type="tel"] {
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="password"] {
             width: 100%;
             padding: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            box-sizing: border-box;
             font-size: 16px;
         }
-        input[type="tel"]:focus {
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        input[type="password"]:focus {
             outline: none;
             border-color: #007bff;
             box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
         }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 0.9em;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .password-container .fa-eye,
+        .password-container .fa-eye-slash {
+            position: absolute;
+            top: 57%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #ffffff;
+        }
+
+        footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .form {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            input[type="text"],
+            input[type="email"],
+            input[type="tel"],
+            input[type="password"],
+            button {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
-<main>
-<form class="form" action="" method="post">
+    <form class="form" action="" method="post">
         <h1>Sign Up</h1>
         <div>
             <label for="username">Username:</label>
@@ -156,33 +223,31 @@ footer {
         <button type="submit">Register</button>
         <footer>Already a member? <a href="login.php">Login here</a></footer>
     </form>
-</main>
 
-<script>
-    document.getElementById('email').addEventListener('input', function() {
-        document.getElementById('email-error').textContent = '';
-    });
+    <script>
+        document.getElementById('email').addEventListener('input', function() {
+            document.getElementById('email-error').textContent = '';
+        });
 
-    document.getElementById('phone').addEventListener('input', function() {
-        var phoneNumber = this.value;
-        var phoneError = document.getElementById('phone-error');
-        if (phoneNumber.length !== 10 || !/^\d+$/.test(phoneNumber)) {
-            phoneError.textContent = 'Phone number must be exactly 10 digits.';
-        } else {
-            phoneError.textContent = '';
-        }
-    });
+        document.getElementById('phone').addEventListener('input', function() {
+            var phoneNumber = this.value;
+            var phoneError = document.getElementById('phone-error');
+            if (phoneNumber.length !== 10 || !/^\d+$/.test(phoneNumber)) {
+                phoneError.textContent = 'Phone number must be exactly 10 digits.';
+            } else {
+                phoneError.textContent = '';
+            }
+        });
 
-    const togglePassword = document.querySelector('#togglePassword');
-    const password = document.querySelector('#password');
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
 
-    togglePassword.addEventListener('click', function (e) {
-        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-        password.setAttribute('type', type);
-        this.classList.toggle('fa-eye-slash');
-    });
-</script>
-
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
 </body>
 </html>
 <?php ob_end_flush(); ?>

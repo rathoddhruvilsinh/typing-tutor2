@@ -10,6 +10,15 @@ if (!isset($_SESSION['temp_user'])) {
 $error = "";
 $success = "";
 
+// Check if OTP was resent
+if (isset($_SESSION['otp_resent']) && $_SESSION['otp_resent'] === true) {
+    $success = "OTP has been resent to your email.";
+    unset($_SESSION['otp_resent']); // Clear the session variable
+} elseif (isset($_SESSION['otp_resend_error'])) {
+    $error = $_SESSION['otp_resend_error'];
+    unset($_SESSION['otp_resend_error']); // Clear the session variable
+}
+
 if (isset($_POST['otp'])) {
     $entered_otp = mysqli_real_escape_string($con, $_POST['otp']);
     $email = $_SESSION['temp_user']['email'];
@@ -44,6 +53,8 @@ if (isset($_POST['otp'])) {
             } else {
                 $error = "Error in registration: " . mysqli_error($con);
             }
+        } else {
+            $error = "Incorrect OTP. Please try again.";
         }
     }
 }
@@ -57,29 +68,39 @@ if (isset($_POST['otp'])) {
     <title>Verify OTP</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Roboto', sans-serif;
             background-image: url(bg.jpg);
-            background-size: 1366px 768px;
+            background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-position: center;        
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            padding: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
         }
 
         .form {
-            background-color: transparent;
-            backdrop-filter: blur(2px);
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 400px;
         }
 
         .login-title {
@@ -94,19 +115,26 @@ if (isset($_POST['otp'])) {
             width: 100%;
             padding: 12px;
             margin-bottom: 20px;
-            border: 1px solid #ddd;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 4px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
+            font-size: 16px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .login-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
         }
 
         .login-input:focus {
             border-color: #a1c4fd;
             outline: none;
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
         .login-button {
-            width: 107%;
+            width: 100%;
             padding: 12px;
             background-color: #1876f2;
             color: white;
@@ -121,23 +149,26 @@ if (isset($_POST['otp'])) {
             background-color: #0056b3;
         }
 
-        .error, .success {
-            text-align: center;
-            margin-top: 15px;
-            padding: 10px;
+        .error-message {
+            color: #ff0000;
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
             border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
         }
 
-        .error {
-            color: #721c24;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-        }
-
-        .success {
-            color: #155724;
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
+        .success-message {
+            color: #50cf50;
+            background-color: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
         }
 
         p {
@@ -147,31 +178,63 @@ if (isset($_POST['otp'])) {
         }
 
         a {
-            color: #ffffff;
+            color: #a1c4fd;
             text-decoration: none;
+            transition: color 0.3s ease;
         }
 
         a:hover {
+            color: #ffffff;
             text-decoration: underline;
         }
 
         @media (max-width: 480px) {
             .form {
+                padding: 30px;
+            }
+
+            .login-title {
+                font-size: 22px;
+            }
+
+            .login-input,
+            .login-button {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .form {
                 padding: 20px;
+            }
+
+            .login-title {
+                font-size: 20px;
+            }
+
+            .login-input,
+            .login-button {
+                font-size: 13px;
             }
         }
     </style>
 </head>
 <body>
-    <form class="form" method="post">
-        <h1 class="login-title">Verify OTP</h1>
-        <input type="text" class="login-input" name="otp" placeholder="Enter 6-digit OTP" required />
-        <input type="submit" name="submit" value="Verify" class="login-button">
-        <?php 
-        if ($error) echo "<p class='error'>$error</p>";
-        if ($success) echo "<p class='success'>$success</p>";
-        ?>
-        <p>Didn't receive OTP? <a href="resend_otp.php">Resend OTP</a></p>
-    </form>
+    <div class="container">
+        <form class="form" method="post">
+            <h1 class="login-title">Verify OTP</h1>
+            <?php 
+            if ($error) {
+                echo "<div class='error-message'>$error</div>";
+            }
+            if ($success) {
+                echo "<div class='success-message'>$success</div>";
+            }
+            ?>
+            <input type="text" class="login-input" name="otp" placeholder="Enter 6-digit OTP" required />
+            <input type="submit" name="submit" value="Verify" class="login-button">
+            <p>Didn't receive OTP? <a href="resend_otp.php?email=<?php echo urlencode($_SESSION['temp_user']['email']); ?>">Resend OTP</a></p>
+        </form>
+    </div>
 </body>
 </html>
