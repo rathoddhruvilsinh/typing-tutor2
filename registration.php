@@ -53,50 +53,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <title>Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #BBE9FF;
             margin: 0;
             padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-image: url(bg.jpg);
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: center;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
         }
-
-        .form {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            padding: 30px;
+        .container {
+            background-color: #ffffff;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.462);
+            padding: 40px;
             width: 100%;
             max-width: 400px;
         }
-
-        h1 {
+        .logo {
             text-align: center;
-            color: #ffffff;
-            margin-bottom: 20px;
-            font-size: 24px;
+            margin-bottom: 24px;
         }
-
+        .logo img {
+            width: 120px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #ffffff;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        label a{
+            color:  #1877f2;
         }
 
         input[type="text"],
@@ -105,124 +108,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
         input[type="password"] {
             width: 100%;
             padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
         }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="tel"]:focus,
-        input[type="password"]:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-        }
-
-        .error-message {
-            color: #ff4444;
-            font-size: 0.9em;
-            margin-top: -10px;
-            margin-bottom: 10px;
-        }
-
-        .password-container {
-            position: relative;
-        }
-
-        .password-container .fa-eye,
-        .password-container .fa-eye-slash {
-            position: absolute;
-            top: 57%;
-            right: 10px;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #666;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: #ffffff;
+        .btn {
+            background-color: #1877f2;
+            color: #fff;
             border: none;
             border-radius: 4px;
+            padding: 12px;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            width: 100%;
         }
-
-        button:hover {
-            background-color: #0056b3;
+        .error-message {
+            color: #d93025;
+            font-size: 14px;
+            margin-top: 5px;
         }
-
-        footer {
+        .login-link {
             text-align: center;
             margin-top: 20px;
-            color: #ffffff;
+            font-size: 14px;
+            color: #666;
         }
-
-        footer a {
-            color: #007bff;
+        .login-link a {
+            color: #1877f2;
             text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 480px) {
-            .form {
-                padding: 20px;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
-
-            input[type="text"],
-            input[type="email"],
-            input[type="tel"],
-            input[type="password"],
-            button {
-                font-size: 14px;
-            }
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
-    <form class="form" action="" method="post">
-        <h1>Sign Up</h1>
-        <div>
-            <label for="username">Username:</label>
-            <input type="text" name="username" id="username" required value="<?php echo isset($_REQUEST['username']) ? htmlspecialchars($_REQUEST['username']) : ''; ?>">
+    <div class="container">
+        
+        <h1>Create an account</h1>
+        <form action="" method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" required value="<?php echo isset($_REQUEST['username']) ? htmlspecialchars($_REQUEST['username']) : ''; ?>">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" required value="<?php echo isset($_REQUEST['email']) ? htmlspecialchars($_REQUEST['email']) : ''; ?>">
+                <p class="error-message" id="email-error"><?php echo $email_error; ?></p>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" name="phone" id="phone" required pattern="\d{10}" title="Please enter exactly 10 digits" value="<?php echo isset($_REQUEST['phone']) ? htmlspecialchars($_REQUEST['phone']) : ''; ?>">
+                <p class="error-message" id="phone-error"><?php echo $phone_error; ?></p>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" required>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="agree" id="agree" value="yes" required> I agree with the
+                    <a href="#" title="term of services">terms of service</a>
+                </label>
+            </div>
+            <button type="submit" class="btn">Create account</button>
+        </form>
+        <div class="login-link">
+            Already have an account? <a href="login.php">Log in</a>
         </div>
-        <div>
-            <label for="email">Email:</label>
-            <input type="email" name="email" id="email" required value="<?php echo isset($_REQUEST['email']) ? htmlspecialchars($_REQUEST['email']) : ''; ?>">
-            <p class="error-message" id="email-error"><?php echo $email_error; ?></p>
-        </div>
-        <div>
-            <label for="phone">Phone Number:</label>
-            <input type="tel" name="phone" id="phone" required pattern="\d{10}" title="Please enter exactly 10 digits" value="<?php echo isset($_REQUEST['phone']) ? htmlspecialchars($_REQUEST['phone']) : ''; ?>">
-            <p class="error-message" id="phone-error"><?php echo $phone_error; ?></p>
-        </div>
-        <div class="password-container">
-            <label for="password">Password:</label>
-            <input type="password" name="password" id="password" required>
-            <i class="fas fa-eye" id="togglePassword"></i>
-        </div>
-        <div>
-            <label for="agree">
-                <input type="checkbox" name="agree" id="agree" value="yes" required/> I agree
-                with the
-                <a href="#" title="term of services">term of services</a>
-            </label>
-        </div>
-        <button type="submit">Register</button>
-        <footer>Already a member? <a href="login.php">Login here</a></footer>
-    </form>
+    </div>
 
     <script>
         document.getElementById('email').addEventListener('input', function() {
@@ -237,15 +189,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
             } else {
                 phoneError.textContent = '';
             }
-        });
-
-        const togglePassword = document.querySelector('#togglePassword');
-        const password = document.querySelector('#password');
-
-        togglePassword.addEventListener('click', function (e) {
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            this.classList.toggle('fa-eye-slash');
         });
     </script>
 </body>

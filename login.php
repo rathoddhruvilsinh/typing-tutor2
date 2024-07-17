@@ -5,18 +5,16 @@ session_start();
 $registered_username = '';
 if (isset($_SESSION['registered_username'])) {
     $registered_username = $_SESSION['registered_username'];
-    unset($_SESSION['registered_username']); // Clear the session variable after use
+    unset($_SESSION['registered_username']);
 }
 
 $error_message = '';
 
-// When form submitted, check and create user session.
 if (isset($_POST['username'])) {
     $username = stripslashes($_REQUEST['username']);
     $username = mysqli_real_escape_string($con, $username);
     $password = stripslashes($_REQUEST['password']);
     
-    // Check user is exist in the database
     $query = "SELECT * FROM `users` WHERE username='$username'";
     $result = mysqli_query($con, $query) or die(mysqli_error($con));
     $rows = mysqli_num_rows($result);
@@ -24,9 +22,7 @@ if (isset($_POST['username'])) {
         $user = mysqli_fetch_assoc($result);
         if (password_verify($password, $user['password'])) {
             $_SESSION['username'] = $username;
-            // Fetch history immediately after login
             echo "<script>window.onload = function() { if(typeof fetchHistory === 'function') { fetchHistory(); } }</script>";
-            // Redirect to user dashboard page
             header("Location: index.php");
             exit();
         } else {
@@ -38,154 +34,168 @@ if (isset($_POST['username'])) {
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-image: url(bg.jpg);
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: center;
+            font-family: 'Inter', sans-serif;
+            background-color: #BBE9FF;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
         }
-
-        .form {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.462);
             padding: 40px;
-            border-radius: 9px;
-            box-shadow: 0 1px 5px rgba(255, 255, 255, 0.3);
             width: 100%;
             max-width: 400px;
-            box-sizing: border-box;
         }
-
-        .login-title {
+        .logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .logo img {
+            width: 120px;
+        }
+        h1 {
             font-size: 24px;
-            color: #ffffff;
-            margin-bottom: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 24px;
             text-align: center;
         }
-
-        .login-input {
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+        }
+        input[type="text"],
+        input[type="password"] {
             width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .forgot-password {
+            text-align: right;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .forgot-password a {
+            color: #1877f2;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .btn {
+            background-color: #1877f2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
             padding: 12px;
-            margin-bottom: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #ddd;
+        }
+        .divider span {
+            padding: 0 10px;
+            color: #666;
+            font-size: 14px;
+        }
+        .social-login {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .social-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
-            box-sizing: border-box;
+            color: #333;
+            text-decoration: none;
+            margin: 0 5px;
         }
-
-        .login-button {
-            width: 100%;
-            padding: 12px;
-            background-color: #1876f2;
-            color: #ffffff;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+        .social-btn img {
+            width: 20px;
+            margin-right: 10px;
         }
-
-        .login-button:hover {
-            background-color: #166fe5;
-        }
-
-        .link {
+        .signup-link {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 20px;
             font-size: 14px;
-            color: #ffffff;
+            color: #000000;
         }
-
-        .link a {
+        .signup-link a {
             color: #1877f2;
             text-decoration: none;
+            font-weight: 500;
         }
-
-        .link a:hover {
-            text-decoration: underline;
-        }
-
         .error-message {
             color: #d93025;
             font-size: 14px;
             text-align: center;
             margin-bottom: 15px;
         }
-
-        .password-container {
-            position: relative;
-        }
-        .password-container .fa-eye, .password-container .fa-eye-slash {
-            position: absolute;
-            top: 40%;
-            right: 10px;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #666;
-        }
-
-        @media (max-width: 480px) {
-            .form {
-                padding: 20px;
-            }
-
-            .login-title {
-                font-size: 20px;
-            }
-
-            .login-input, .login-button {
-                font-size: 14px;
-            }
-        }
     </style>
 </head>
 <body>
-    <form class="form" method="post" name="login">
-        <h1 class="login-title">Login</h1>
-        <?php if ($error_message): ?>
-            <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
-        <?php endif; ?>
-        <input type="text" class="login-input" name="username" placeholder="Username" autofocus="true" value="<?php echo htmlspecialchars($registered_username); ?>"/>
-        <div class="password-container">
-            <input type="password" class="login-input" name="password" placeholder="Password" id="password"/>
-            <i class="fas fa-eye" id="togglePassword"></i>
+    <div class="container">
+        <h1>Welcome To Typing Tutor</h1>
+        <form method="post" name="login">
+            <?php if ($error_message): ?>
+                <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
+            <?php endif; ?>
+            <div class="form-group">
+                <label for="username">Email or username</label>
+                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($registered_username); ?>" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="forgot-password">
+                <a href="forgot_password.php">Forgot password?</a>
+            </div>
+            <button type="submit" class="btn">Sign in</button>
+        </form>
+        <div class="divider">
+            <span>Or</span>
         </div>
-        
-        <input type="submit" value="Login" name="submit" class="login-button"/>
-        
-        <p class="link"><a href="forgot_password.php">Forgot your password?</a></p>
-        <p class="link">Don't have an account? <a href="registration.php">Sign up Now</a></p>
-    </form>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const togglePassword = document.querySelector('#togglePassword');
-            const password = document.querySelector('#password');
-
-            togglePassword.addEventListener('click', function (e) {
-                // toggle the type attribute
-                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-                password.setAttribute('type', type);
-                // toggle the eye / eye slash icon
-                this.classList.toggle('fa-eye');
-                this.classList.toggle('fa-eye-slash');
-            });
-        });
-    </script>
+        <div class="social-login">
+        </div>
+        <div class="signup-link">
+            Don't have an account? <a href="registration.php">Create an account</a>
+        </div>
+    </div>
 </body>
 </html>

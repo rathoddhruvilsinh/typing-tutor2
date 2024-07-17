@@ -76,7 +76,7 @@ if (isset($_POST['otp'])) {
 
         body {
             font-family: 'Roboto', sans-serif;
-            background-image: url(bg.jpg);
+            background-color: #BBE9FF;
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;

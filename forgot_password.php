@@ -74,7 +74,7 @@ if (isset($_POST['email']) && isset($_POST['csrf_token'])) {
 
     body {
         font-family: 'Roboto', sans-serif;
-        background-image: url(bg.jpg);
+        background-color: #BBE9FF;
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
