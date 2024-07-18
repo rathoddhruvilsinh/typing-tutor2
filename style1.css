@@ -1,108 +1,113 @@
 :root {
-    --primary-color: #3498db;
-    --secondary-color: #2980b9;
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --accent-color: #3498db;
     --background-color: #ecf0f1;
-    --text-color: #34495e;
-    --error-color: #e74c3c;
+    --text-color: #2c3e50;
     --success-color: #2ecc71;
+    --error-color: #e74c3c;
 }
 
 body {
-    font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-    background-color: #BBE9FF;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position: center;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
+    min-height: 100vh;
     color: var(--text-color);
 }
 
-.form {
-    background-color: transparent;
-    backdrop-filter: blur(2px);
+.container {
+    background: linear-gradient(135deg, #ffffff, #f5f5f5);
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     padding: 40px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.582);
     width: 100%;
     max-width: 400px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-
-.login-title {
-    font-size: 28px;
+h1 {
+    font-size: 24px;
+    font-weight: 700;
     color: var(--primary-color);
-    margin-bottom: 30px;
+    margin-bottom: 24px;
     text-align: center;
-    font-weight: 300;
+    font-family: 'Montserrat', sans-serif;
 }
 
-.login-input {
-    width: 100%;
-    padding: 12px;
+.form-group {
     margin-bottom: 20px;
-    border: none;
-    border-bottom: 2px solid #bdc3c7;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
-    background-color: transparent;
+    width: 89.1%;
+    position: relative;
 }
 
-.login-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 600;
 }
 
-.login-button {
+input[type="password"] {
     width: 100%;
-    padding: 12px;
-    background-color: var(--primary-color);
-    color: #ffffff;
+    padding: 10px 10px 10px 30px;
+    border: 2px solid var(--accent-color);
+    border-radius: 5px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+input[type="password"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+}
+
+.btn {
+    background-color: var(--accent-color);
+    color: #fff;
     border: none;
-    border-radius: 25px;
+    border-radius: 5px;
+    padding: 12px;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    width: 100%;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.login-button:hover {
-    background-color: var(--secondary-color);
+.btn:hover {
+    background-color: var(--primary-color);
     transform: translateY(-2px);
 }
 
-.login-button:active {
-    transform: translateY(1px);
-}
-
-.link {
+.login-link {
     text-align: center;
     margin-top: 20px;
     font-size: 14px;
+    color: var(--text-color);
 }
 
-.link a {
-    color: var(--primary-color);
+.login-link a {
+    color: var(--accent-color);
     text-decoration: none;
+    font-weight: 600;
     transition: color 0.3s ease;
 }
 
-.link a:hover {
-    color: var(--secondary-color);
+.login-link a:hover {
+    color: var(--primary-color);
 }
 
-.error-message, .success-message {
+.error-message,
+.success-message {
     font-size: 14px;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     padding: 10px;
-    border-radius: 4px;
-    animation: fadeIn 0.5s ease;
+    border-radius: 5px;
 }
 
 .error-message {
@@ -113,6 +118,44 @@ body {
 .success-message {
     color: var(--success-color);
     background-color: rgba(46, 204, 113, 0.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+    .form {
+        padding: 30px;
+    }
+
+    .login-title {
+        font-size: 24px;
+    }
+
+    .login-input, .login-button {
+        font-size: 14px;
+    }
+}
+
+/* New styles for icons */
+.form-group label i,
+.btn i,
+.login-link a i {
+    margin-right: 8px;
+}
+
+.error-message i,
+.success-message i {
+    margin-right: 5px;
+}
+
+.form-group i {
+    position: absolute;
+    left: 10px;
+    top: 38px;
+    color: var(--accent-color);
 }
 
 @keyframes fadeIn {

@@ -30,29 +30,13 @@ if (isset($_POST['otp'])) {
         $check_otp_result = mysqli_query($con, $check_otp_query);
         
         if (mysqli_num_rows($check_otp_result) == 1) {
-            // OTP is correct, register the user
-            $username = $_SESSION['temp_user']['username'];
-            $email = $_SESSION['temp_user']['email'];
-            $password = $_SESSION['temp_user']['password'];
-            $phone = $_SESSION['temp_user']['phone'];
+            // OTP is correct, proceed to payment
+            // Delete the used OTP
+            $delete_otp_query = "DELETE FROM `otp_table` WHERE email='$email'";
+            mysqli_query($con, $delete_otp_query);
         
-            $query = "INSERT into `users` (username, email, phone, password) 
-          VALUES ('$username', '$email', '$phone', '$password')";
-
-            $result = mysqli_query($con, $query);
-            if ($result) {
-                // Registration successful
-                $_SESSION['username'] = $username;
-
-                // Delete the used OTP
-                $delete_otp_query = "DELETE FROM `otp_table` WHERE email='$email'";
-                mysqli_query($con, $delete_otp_query);
-    
-                $success = "Registration successful! Redirecting to homepage...";
-                header("refresh:3;url=index.php"); // Redirect after 3 seconds
-            } else {
-                $error = "Error in registration: " . mysqli_error($con);
-            }
+            $success = "OTP verified successfully! Redirecting to payment...";
+            header("refresh:3;url=payment.php"); // Redirect to payment page after 3 seconds
         } else {
             $error = "Incorrect OTP. Please try again.";
         }
@@ -63,97 +47,100 @@ if (isset($_POST['otp'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify OTP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Verify OTP - Typing Tutor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto+Mono&family=Roboto:wght@400;700&display=swap');
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --background-color: #ecf0f1;
+            --text-color: #2c3e50;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
         }
 
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #BBE9FF;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: center;        
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
         }
 
         .container {
             width: 100%;
             max-width: 400px;
+            margin-top: 200px;
         }
 
         .form {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            width: 100%;
+            background: linear-gradient(135deg, #ffffff, #f5f5f5);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
-        .login-title {
-            color: #ffffff;
+        .form-title {
+            color: var(--primary-color);
             font-size: 24px;
             margin-bottom: 20px;
             text-align: center;
-            font-weight: 500;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
         }
 
-        .login-input {
-            width: 100%;
+        .form-input {
+            width: 92%;
             padding: 12px;
             margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
+            border: 2px solid var(--accent-color);
+            border-radius: 5px;
             font-size: 16px;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            transition: border-color 0.3s ease, background-color 0.3s ease;
+            background-color: #ffffff;
+            color: var(--text-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .login-input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .login-input:focus {
-            border-color: #a1c4fd;
+        .form-input:focus {
             outline: none;
-            background-color: rgba(255, 255, 255, 0.2);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
         }
 
-        .login-button {
+        .form-button {
             width: 100%;
             padding: 12px;
-            background-color: #1876f2;
-            color: white;
+            background: rgb(147,191,255);
+            background: linear-gradient(135deg, rgba(147,191,255,1) 28%, rgba(23,74,255,1) 66%);
+            color: #ffffff;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .login-button:hover {
-            background-color: #0056b3;
+        .form-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
         }
 
         .error-message {
-            color: #ff0000;
-            background-color: rgba(255, 0, 0, 0.1);
-            border: 1px solid #ff0000;
-            border-radius: 4px;
+            color: var(--error-color);
+            background-color: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--error-color);
+            border-radius: 5px;
             padding: 10px;
             margin-bottom: 15px;
             text-align: center;
@@ -161,10 +148,10 @@ if (isset($_POST['otp'])) {
         }
 
         .success-message {
-            color: #50cf50;
-            background-color: rgba(0, 255, 0, 0.1);
-            border: 1px solid #00ff00;
-            border-radius: 4px;
+            color: var(--success-color);
+            background-color: rgba(46, 204, 113, 0.1);
+            border: 1px solid var(--success-color);
+            border-radius: 5px;
             padding: 10px;
             margin-bottom: 15px;
             text-align: center;
@@ -174,47 +161,36 @@ if (isset($_POST['otp'])) {
         p {
             text-align: center;
             margin-top: 20px;
-            color: #ffffff;
+            color: var(--text-color);
         }
 
         a {
-            color: #a1c4fd;
+            color: var(--accent-color);
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
         a:hover {
-            color: #ffffff;
+            color: #2980b9;
             text-decoration: underline;
         }
 
-        @media (max-width: 480px) {
-            .form {
-                padding: 30px;
+        @media screen and (max-width: 480px) {
+            .container {
+                padding: 0 20px;
             }
 
-            .login-title {
-                font-size: 22px;
-            }
-
-            .login-input,
-            .login-button {
-                font-size: 14px;
-            }
-        }
-
-        @media (max-width: 320px) {
             .form {
                 padding: 20px;
             }
 
-            .login-title {
+            .form-title {
                 font-size: 20px;
             }
 
-            .login-input,
-            .login-button {
-                font-size: 13px;
+            .form-input,
+            .form-button {
+                font-size: 14px;
             }
         }
     </style>
@@ -222,7 +198,7 @@ if (isset($_POST['otp'])) {
 <body>
     <div class="container">
         <form class="form" method="post">
-            <h1 class="login-title">Verify OTP</h1>
+            <h1 class="form-title">Verify OTP</h1>
             <?php 
             if ($error) {
                 echo "<div class='error-message'>$error</div>";
@@ -231,8 +207,8 @@ if (isset($_POST['otp'])) {
                 echo "<div class='success-message'>$success</div>";
             }
             ?>
-            <input type="text" class="login-input" name="otp" placeholder="Enter 6-digit OTP" required />
-            <input type="submit" name="submit" value="Verify" class="login-button">
+            <input type="text" class="form-input" name="otp" placeholder="Enter 6-digit OTP" required />
+            <button type="submit" name="submit" class="form-button">Verify</button>
             <p>Didn't receive OTP? <a href="resend_otp.php?email=<?php echo urlencode($_SESSION['temp_user']['email']); ?>">Resend OTP</a></p>
         </form>
     </div>

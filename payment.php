@@ -1,137 +1,134 @@
+<?php
+session_start();
+require('db.php');
+
+if (!isset($_SESSION['temp_user'])) {
+    header("Location: registration.php");
+    exit();
+}
+
+$key_id = 'rzp_test_sC9wQzWpja3MGt';
+$key_secret = 'h6DAMnUJo2QrP9Xl4lmzBDIG';
+$amount = 100000; // Amount in paise (e.g., 100 paise = 1 INR)
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Subscribe to Pro Plan</title>
-  <style>
-    body {
-        background-color: #f9f9f9;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Typing Tutor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --background-color: #ecf0f1;
+            --text-color: #2c3e50;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
 
-    .subscription-form {
-      background-color: #f9f9f9;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.401);
-    }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
 
-    .subscription-form h2 {
-      margin-bottom: 10px;
-    }
+        .container {
+            background: linear-gradient(135deg, #ffffff, #f5f5f5);
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
 
-    .subscription-form label {
-      display: block;
-      margin-bottom: 5px;
-    }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 24px;
+            font-family: 'Montserrat', sans-serif;
+        }
 
-    .subscription-form input,
-    .subscription-form button {
-      width: 95%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
+        #pay-button {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
 
-    .subscription-form select {
-      width: 101%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .submit {
-      width: 105%;
-      padding: 8px;
-      margin-top: 15px;
-      margin-bottom: 10px;
-      margin-left: -8px;
-    }
-
-
-    #card-element {
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 4px;
-    }
-
-    #card-errors {
-      color: red;
-      margin-top: 10px;
-    }
-  </style>
-  <script src="https://js.stripe.com/v3/"></script>
+        #pay-button:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
-  <div class="subscription-form">
-    <h2>Subscribe for Typing tutor</h2>
-    <p>₹20/month + tax</p>
-    <form id="subscription-form">
-      <label for="name">Full name</label>
-      <input type="text" id="name" name="name" required>
-      
-      <label for="country">Country or region</label>
-      <select id="country" name="country" required>
-        <option value="India">India</option>
-        <!-- Add other countries as needed -->
-      </select>
-      
-      <label for="address">Address</label>
-      <input type="text" id="address" name="address" required>
-      
-      <label for="card-element">Card</label>
-      <div id="card-element"></div>
-      
-      <div class="submit">
-      <button type="submit">Subscribe</button>
-      </div>
-    </form>
-    <div id="card-errors" role="alert"></div>
-  </div>
+    <div class="container">
+        <h1>Complete Payment</h1>
+        <button id="pay-button">Pay Now</button>
+    </div>
 
-  <script>
-    // Replace with your own Stripe publishable key
-    const stripe = Stripe('your-publishable-key-here');
-    const elements = stripe.elements();
-    const cardElement = elements.create('card');
-    cardElement.mount('#card-element');
-
-    const form = document.getElementById('subscription-form');
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      const { token, error } = await stripe.createToken(cardElement);
-
-      if (error) {
-        // Display error.message in your UI
-        document.getElementById('card-errors').textContent = error.message;
-      } else {
-        // Send token to your server
-        fetch('/subscribe', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ token: token.id, name: form.name.value, country: form.country.value, address: form.address.value }),
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            alert('Subscription successful!');
-          } else {
-            alert('Subscription failed!');
-          }
-        });
-      }
-    });
-  </script>
+    <script>
+        var options = {
+            "key": "<?php echo $key_id; ?>",
+            "amount": "<?php echo $amount; ?>",
+            "currency": "INR",
+            "name": "Typing Tutor",
+            "description": "Registration Fee",
+            "handler": function (response){
+                // Send the payment ID to the server for verification
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "verify_payment.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                var result = JSON.parse(xhr.responseText);
+                                if (result.success) {
+                                    window.location.href = "index.php";
+                                } else {
+                                    alert("Payment failed: " + (result.error || "Unknown error"));
+                                }
+                            } catch (e) {
+                                alert("An error occurred while processing the payment response.");
+                            }
+                        } else {
+                            alert("Server error: " + xhr.status);
+                        }
+                    }
+                };
+                xhr.send("payment_id=" + response.razorpay_payment_id);
+            },
+            "prefill": {
+                "name": "<?php echo $_SESSION['temp_user']['username']; ?>",
+                "email": "<?php echo $_SESSION['temp_user']['email']; ?>"
+            },
+            "theme": {
+                "color": "#3498db"
+            }
+        };
+        var rzp = new Razorpay(options);
+        document.getElementById('pay-button').onclick = function(e){
+            rzp.open();
+            e.preventDefault();
+        }
+    </script>
 </body>
 </html>

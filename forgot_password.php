@@ -32,7 +32,6 @@ if (isset($_POST['email']) && isset($_POST['csrf_token'])) {
             $stmt = $con->prepare("INSERT INTO password_reset_tokens (email, token, expires) VALUES (?, ?, ?)");
             $stmt->bind_param("sss", $email, $token, $expires);
             $stmt->execute();
-            
             $reset_link = "http://localhost/login2/reset_password.php?email=" . urlencode($email) . "&token=" . $token;
             $message = "Click the following link to reset your password: " . $reset_link . "\n\nThis link will expire in 1 hour.";
             
@@ -54,177 +53,149 @@ if (isset($_POST['email']) && isset($_POST['csrf_token'])) {
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>Forgot Password - Typing Tutor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-
-    :root {
-        --primary-color: #3498db;
-        --secondary-color: #2980b9;
-        --background-color: #ecf0f1;
-        --text-color: #34495e;
-        --error-color: #e74c3c;
-        --success-color: #2ecc71;
-    }
-
-    body {
-        font-family: 'Roboto', sans-serif;
-        background-color: #BBE9FF;
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        background-position: center;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        color: var(--text-color);
-        padding: 20px;
-    }
-
-    .container {
-        width: 100%;
-        max-width: 400px;
-    }
-
-    .form {
-        background-color: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(5px);
-        padding: 40px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.582);
-        width: 100%;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .login-title {
-        font-size: 24px;
-        color: #333;
-        text-align: center;
-        margin-bottom: 24px;
-    }
-
-    .input-group {
-        margin-bottom: 20px;
-    }
-
-    .login-input {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 16px;
-        transition: border-color 0.3s;
-    }
-
-    .login-input:focus {
-        outline: none;
-        border-color: #1877f2;
-    }
-
-    .login-button {
-        width: 100%;
-        padding: 12px;
-        background-color: #1877f2;
-        color: #ffffff;
-        border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .login-button:hover {
-        background-color: #166fe5;
-    }
-
-    .link {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    .link a {
-        color: #1877f2;
-        text-decoration: none;
-        transition: color 0.3s;
-    }
-
-    .link a:hover {
-        color: #166fe5;
-    }
-
-    .error-message,
-    .success-message {
-        padding: 12px;
-        border-radius: 4px;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-
-    .error-message {
-        background-color: #ffebee;
-        color: #c62828;
-    }
-
-    .success-message {
-        background-color: #e8f5e9;
-        color: #2e7d32;
-    }
-
-    @media (max-width: 480px) {
-        .form {
-            padding: 30px 20px;
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --background-color: #ecf0f1;
+            --text-color: #2c3e50;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
         }
 
-        .login-title {
-            font-size: 22px;
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
         }
 
-        .login-input,
-        .login-button {
+        .container {
+            background: linear-gradient(135deg, #ffffff, #f5f5f5);
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 24px;
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
             font-size: 14px;
-        }
-    }
-
-    @media (max-width: 320px) {
-        .form {
-            padding: 20px 15px;
+            font-weight: 600;
         }
 
-        .login-title {
-            font-size: 20px;
+        input[type="email"] {
+            width: 94%;
+            padding: 10px;
+            border: 2px solid var(--accent-color);
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.3s ease;
         }
 
-        .login-input,
-        .login-button {
-            font-size: 13px;
+        input[type="email"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
         }
-    }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        .login-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: var(--primary-color);
+        }
+
+        .error-message,
+        .success-message {
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        .success-message {
+            color: var(--success-color);
+            background-color: rgba(46, 204, 113, 0.1);
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1>Forgot Password</h1>
         <form class="form" method="post">
-            <h1 class="login-title">Forgot Password</h1>
             <?php 
             if ($error_message) echo "<p class='error-message'>$error_message</p>";
             if ($success_message) echo "<p class='success-message'>$success_message</p>";
             ?>
-            <div class="input-group">
-                <input type="email" class="login-input" name="email" placeholder="Email Address" required autofocus>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required autofocus>
             </div>
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-            <div class="input-group">
-                <input type="submit" value="Send Reset Link" name="submit" class="login-button">
-            </div>
-            <p class="link"><a href="login.php">Back to Login</a></p>
+            <button type="submit" class="btn" name="submit">Send Reset Link</button>
         </form>
+        <div class="login-link">
+            <a href="login.php">Back to Login</a>
+        </div>
     </div>
 </body>
 </html>
