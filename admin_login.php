@@ -1,26 +1,34 @@
 <?php
 session_start();
-
-// Set static username and password
-$static_username = "admin";
-$static_password = "123";
+require_once 'db.php';  // Include the database connection file
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
+    $username = mysqli_real_escape_string($con, $_POST['username']);
     $password = $_POST['password'];
 
-    if ($username === $static_username && $password === $static_password) {
-        session_regenerate_id(true);
-        
-        $_SESSION['user_id'] = 1; // You can set any arbitrary ID
-        $_SESSION['username'] = $username;
-        $_SESSION['user_role'] = 'admin';
-        
-        $params = session_get_cookie_params();
-        setcookie(session_name(), session_id(), 0, $params["path"], $params["domain"], true, true);
-        
-        header("Location: dashboard.php");
-        exit();
+    $query = "SELECT * FROM admin_users WHERE username = '$username'";
+    $result = mysqli_query($con, $query);
+
+    if (!$result) {
+        error_log("MySQL Error: " . mysqli_error($con));
+        $error = "An error occurred. Please try again later.";
+    } elseif (mysqli_num_rows($result) > 0) {
+        $user = mysqli_fetch_assoc($result);
+        if (password_verify($password, $user['password'])) {
+            session_regenerate_id(true);
+            
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['user_role'] = 'admin';
+            
+            $params = session_get_cookie_params();
+            setcookie(session_name(), session_id(), 0, $params["path"], $params["domain"], true, true);
+            
+            header("Location: dashboard.php");
+            exit();
+        } else {
+            $error = "Invalid credentials";
+        }
     } else {
         $error = "Invalid credentials";
     }
@@ -42,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
+            background-color: #BBE9FF;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -128,6 +136,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .sign-up:hover {
             background-color: #0056b3;
         }
+
+        .error-message {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -150,10 +164,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="container">
         <div class="left-panel">
             <h1>Welcome to Admin Page</h1>
-            <p>Please login to admin page for see admin dashboard</p>
+            <p>Please login to admin page to see admin dashboard</p>
         </div>
         <div class="right-panel">
             <h2>Admin login</h2>
+            <?php if (isset($error)): ?>
+                <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
+            <?php endif; ?>
             <form method="POST">
                 <div class="input-group">
                     <label for="name">Name</label>

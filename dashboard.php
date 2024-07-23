@@ -5,27 +5,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     exit();
 }
 
-// Database connection
-$host = "localhost";
-$username = "root";
-$password = ""; 
-$database = "user_auth";
-
-$con = mysqli_connect($host, $username, $password, $database);
-
-if (!$con) {
-    error_log("Failed to connect to MySQL: " . mysqli_connect_error());
-    die("Connection failed: " . mysqli_connect_error());
-}
-
-// Test database connection
-$test_query = "SELECT 1";
-$test_result = mysqli_query($con, $test_query);
-if (!$test_result) {
-    error_log("Database connection test failed: " . mysqli_error($con));
-} else {
-    error_log("Database connection test successful");
-}
+require_once 'db.php';
 
 function getUserCount() {
     global $con;
@@ -41,7 +21,7 @@ function getUserCount() {
 
 function getAdminCount() {
     global $con;
-    $query = "SELECT COUNT(*) as admin_count FROM users WHERE user_role = 'admin'";
+    $query = "SELECT COUNT(*) as admin_count FROM admin_users";
     $result = mysqli_query($con, $query);
     if (!$result) {
         error_log("MySQL Error in getAdminCount: " . mysqli_error($con));
@@ -65,11 +45,6 @@ function getNewUserCount() {
 
 function getUsers() {
     global $con;
-    if (!$con) {
-        error_log("Database connection is not available in getUsers");
-        return [];
-    }
-    
     $query = "SELECT id, username, email, created_at FROM users ORDER BY created_at DESC LIMIT 10";
     $result = mysqli_query($con, $query);
     if (!$result) {
@@ -145,34 +120,34 @@ $users = getUsers();
         }
 
         .menu a {
-    position: relative;
-    color: #fff;
-    text-decoration: none;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    transition: var(--transition);
-    padding: 8px 12px;
-}
+            position: relative;
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            padding: 8px 12px;
+        }
 
-.menu a::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    bottom: 0;
-    left: 0;
-    background-color: #2980b9;
-    transform: scaleX(0);
-    transform-origin: bottom right;
-    transition: transform 0.3s ease-out;
-}
+        .menu a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #2980b9;
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease-out;
+        }
 
-.menu a:hover::after,
-.menu a.active::after {
-    transform: scaleX(1);
-    transform-origin: bottom left;
-}
+        .menu a:hover::after,
+        .menu a.active::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
 
         .menu i {
             margin-right: 8px;
@@ -357,56 +332,6 @@ $users = getUsers();
                 padding: 20px;
             }
         }
-
-        .add-user-container {
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-top: 15px;
-            padding: 30px;
-            width: 95%;
-        }
-
-        h2 {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        .input-group input:focus {
-            border-color: #2196f3;
-            outline: none;
-        }
-
-        .add-user-btn {
-            background-color: #2196f3;
-            color: #ffffff;
-            border: none;
-            border-radius: 4px;
-            padding: 12px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            width: 100%;
-        }
-
-        .add-user-btn:hover {
-            background-color: #1e88e5;
-        }
     </style>
 </head>
 <body>
@@ -441,9 +366,9 @@ $users = getUsers();
                     <div class="description">Total admin accounts</div>
                 </div>
                 <div class="dashboard-item">
-                    <h2><i class="fas fa-user-plus"></i> New Users</h2>
+                    <h2><i class="fas fa-user-check"></i> New Users</h2>
                     <div class="value"><?php echo getNewUserCount(); ?></div>
-                    <div class="description">Joined last month</div>
+                    <div class="description">Users joined in the last month</div>
                 </div>
             </div>
 
@@ -484,202 +409,194 @@ $users = getUsers();
                 </thead>
                 <tbody id="userList">
                     <?php foreach ($users as $user): ?>
-                    <tr>
+                    <tr data-user-id="<?php echo htmlspecialchars($user['id']); ?>">
                         <td><?php echo htmlspecialchars($user['id']); ?></td>
                         <td><?php echo htmlspecialchars($user['username']); ?></td>
                         <td><?php echo htmlspecialchars($user['email']); ?></td>
                         <td><?php echo date('Y-m-d', strtotime($user['created_at'])); ?></td>
                         <td class="action-buttons">
-                            <button class="remove-btn" onclick="deleteUser(<?php echo $user['id']; ?>)"><i class="fas fa-trash"></i> REMOVE</button>
+                            <button class="remove-btn"><i class="fas fa-trash"></i> REMOVE</button>
                         </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
             
-            
             <h2 class="section-title">Add User</h2>
-            <div class="add-user-container">
-        <form id="addUserForm">
-            <div class="input-group">
-                <input type="text" id="newUsername" placeholder="Enter username" required>
+            <div class="form-container">
+                <form id="addUserForm">
+                    <div class="input-group">
+                        <input type="text" id="newUsername" placeholder="Enter username" required>
+                        <input type="email" id="newEmail" placeholder="Enter email" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="newPassword" placeholder="Enter password" required>
+                        <input type="tel" id="newPhone" placeholder="Enter phone number" required>
+                    </div>
+                    <button type="submit">Add User</button>
+                </form>
             </div>
-            <div class="input-group">
-                <input type="email" id="newEmail" placeholder="Enter email" required>
-            </div>
-            <div class="input-group">
-                <input type="password" id="newPassword" placeholder="Enter password" required>
-            </div>
-            <div class="input-group">
-                <input type="tel" id="newPhone" placeholder="Enter phone number" required>
-            </div>
-            <button type="submit" class="add-user-btn">Add User</button>
-        </form>
-    </div>
         </div>
 
         <div id="addAdminSection" style="display: none;">
-            <h2 class="section-title">Add Admin User</h2>
+            <h2 class="section-title">Admin User Management</h2>
             <div class="form-container">
-            <form id="addAdminForm">
-                <div class="input-group">
-                    <input type="text" id="newAdminUsername" placeholder="Enter admin username" required>
-                    <input type="password" id="newAdminPassword" placeholder="Enter admin password" required>
-                </div>
-                <button type="submit"><i class="fas fa-plus"></i> Add Admin</button>
-            </form>
+                <h3>Add Admin User</h3>
+                <form id="addAdminForm">
+                    <div class="input-group">
+                        <input type="text" id="newAdminUsername" placeholder="Enter admin username" required>
+                        <input type="password" id="newAdminPassword" placeholder="Enter admin password" required>
+                    </div>
+                    <button type="submit"><i class="fas fa-plus"></i> Add Admin</button>
+                </form>
+            </div>
+
+            <h3 class="sub-section-title">Current Admin Users</h3>
+            <table id="adminTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="adminList">
+                    <!-- Admin users will be populated here -->
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    let users = <?php echo json_encode($users); ?>;
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const userTable = document.getElementById('userTable');
 
-    function renderUserList() {
-        const userList = document.getElementById('userList');
-        userList.innerHTML = '';
-        if (users.length === 0) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td colspan="5" style="text-align: center; font-style: italic; color: #777;">There are no users right now</td>`;
-            userList.appendChild(tr);
-        } else {
-            users.forEach(user => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.username}</td>
-                    <td>${user.email}</td>
-                    <td>${new Date(user.created_at).toLocaleDateString()}</td>
-                    <td class="action-buttons">
-                        <button class="remove-btn" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i> REMOVE</button>
-                    </td>
-                `;
-                userList.appendChild(tr);
-            });
+        userTable.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-btn') || e.target.closest('.remove-btn')) {
+                const row = e.target.closest('tr');
+                const userId = row.dataset.userId;
+                deleteUser(userId);
+            }
+        });
+
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                fetch('delete_user.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'id=' + userId
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const row = document.querySelector(`tr[data-user-id="${userId}"]`);
+                        if (row) {
+                            row.remove();
+                        }
+                        alert('User deleted successfully');
+                    } else {
+                        alert('Failed to delete user: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the user');
+                });
+            }
         }
-    }
 
-    function deleteUser(userId) {
-        if (confirm('Are you sure you want to delete this user?')) {
-            fetch('delete_user.php', {
+        // Add User functionality
+        document.getElementById('addUserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('newUsername').value;
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPassword').value;
+            const phone = document.getElementById('newPhone').value;
+
+            fetch('add_user.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: 'id=' + userId
+                body: `username=${encodeURIComponent(username)}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&phone=${encodeURIComponent(phone)}`
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    users = users.filter(user => user.id !== userId);
-                    renderUserList();
-                    alert('User deleted successfully');
+                    alert('User added successfully');
+                    // Optionally refresh the user list here
+                    location.reload();
                 } else {
-                    alert('Failed to delete user');
+                    alert('Failed to add user: ' + (data.message || 'Unknown error'));
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding the user');
             });
-        }
-    }
-
-    function addUser(username, email, password, phone) {
-        fetch('add_user.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'username=' + encodeURIComponent(username) +
-                  '&email=' + encodeURIComponent(email) +
-                  '&password=' + encodeURIComponent(password) +
-                  '&phone=' + encodeURIComponent(phone)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                users.push({id: data.id, username: username, email: email, created_at: new Date().toISOString()});
-                renderUserList();
-                alert('User added successfully');
-            } else {
-                alert('Failed to add user');
-            }
         });
-    }
 
-    document.getElementById('addUserForm').addEventListener('submit', function(e) {
+        // Add Admin functionality
+        document.getElementById('addAdminForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const newUsername = document.getElementById('newUsername').value;
-            const newEmail = document.getElementById('newEmail').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const newPhone = document.getElementById('newPhone').value;
-            if (newUsername && newEmail && newPassword && newPhone) {
-                // Here you would typically call a function to add the user
-                console.log('Adding user:', { newUsername, newEmail, newPassword, newPhone });
-                this.reset();
-            }
+            const username = document.getElementById('newAdminUsername').value;
+            const password = document.getElementById('newAdminPassword').value;
+
+            fetch('add_admin.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Admin user added successfully');
+                    // Optionally refresh the admin list here
+                    location.reload();
+                } else {
+                    alert('Failed to add admin user: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding the admin user');
+            });
         });
 
-    function addAdminUser(username, password) {
-        fetch('add_admin.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Admin user added successfully');
-            } else {
-                alert('Failed to add admin user');
-            }
-        });
-    }
+        // Navigation functionality
+        const menuLinks = document.querySelectorAll('.menu a');
+        const sections = {
+            dashboard: document.getElementById('dashboardSection'),
+            users: document.getElementById('userSection'),
+            admin: document.getElementById('addAdminSection')
+        };
 
-    document.getElementById('addAdminForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const newAdminUsername = document.getElementById('newAdminUsername').value;
-        const newAdminPassword = document.getElementById('newAdminPassword').value;
-        if (newAdminUsername && newAdminPassword) {
-            addAdminUser(newAdminUsername, newAdminPassword);
-            this.reset();
+        function showSection(sectionId) {
+            for (let key in sections) {
+                sections[key].style.display = key === sectionId ? 'block' : 'none';
+            }
         }
-    });
 
-    // Navigation functionality
-    const menuLinks = document.querySelectorAll('.menu a');
-    const sections = {
-        dashboard: document.getElementById('dashboardSection'),
-        users: document.getElementById('userSection'),
-        admin: document.getElementById('addAdminSection')
-    };
-
-    function showSection(sectionId) {
-        for (let key in sections) {
-            sections[key].style.display = key === sectionId ? 'block' : 'none';
-        }
-    }
-
-    menuLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const sectionId = this.getAttribute('data-section');
-            
-            menuLinks.forEach(item => item.classList.remove('active'));
-            this.classList.add('active');
-            
-            showSection(sectionId);
-            
-            if (sectionId === 'users') {
-                renderUserList();
-            }
+        menuLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sectionId = this.getAttribute('data-section');
+                
+                menuLinks.forEach(item => item.classList.remove('active'));
+                this.classList.add('active');
+                
+                showSection(sectionId);
+            });
         });
-    });
 
-    // Initialize the dashboard view
-    showSection('dashboard');
-    menuLinks[0].classList.add('active');
-});
-</script>
+        // Initialize the dashboard view
+        showSection('dashboard');
+        menuLinks[0].classList.add('active');
+    });
+    </script>
 </body>
 </html>
