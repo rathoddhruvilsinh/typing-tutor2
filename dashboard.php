@@ -8,8 +8,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 // Database connection
 $host = "localhost";
 $username = "root";
-$password = ""; // This is typically empty for XAMPP's default setup
-$database = "user_auth"; // Make sure this database exists in your local MySQL server
+$password = ""; 
+$database = "user_auth";
 
 $con = mysqli_connect($host, $username, $password, $database);
 
@@ -29,7 +29,7 @@ if (!$test_result) {
 
 function getUserCount() {
     global $con;
-    $query = "SELECT COUNT(*) as user_count FROM users WHERE user_role != 'admin'";
+    $query = "SELECT COUNT(*) as user_count FROM users";
     $result = mysqli_query($con, $query);
     if (!$result) {
         error_log("MySQL Error in getUserCount: " . mysqli_error($con));
@@ -52,7 +52,15 @@ function getAdminCount() {
 }
 
 function getNewUserCount() {
-    return "N/A";
+    global $con;
+    $query = "SELECT COUNT(*) as new_user_count FROM users WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)";
+    $result = mysqli_query($con, $query);
+    if (!$result) {
+        error_log("MySQL Error in getNewUserCount: " . mysqli_error($con));
+        return 0;
+    }
+    $row = mysqli_fetch_assoc($result);
+    return $row['new_user_count'];
 }
 
 function getUsers() {
@@ -62,7 +70,7 @@ function getUsers() {
         return [];
     }
     
-    $query = "SELECT id, username, email FROM users";
+    $query = "SELECT id, username, email, created_at FROM users ORDER BY created_at DESC LIMIT 10";
     $result = mysqli_query($con, $query);
     if (!$result) {
         error_log("MySQL Error in getUsers: " . mysqli_error($con));
@@ -72,12 +80,10 @@ function getUsers() {
     while ($row = mysqli_fetch_assoc($result)) {
         $users[] = $row;
     }
-    error_log("Users: " . print_r($users, true));
     return $users;
 }
 
 $users = getUsers();
-error_log("Users: " . print_r($users, true));
 ?>
 
 <!DOCTYPE html>
@@ -86,29 +92,33 @@ error_log("Users: " . print_r($users, true));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Typing Tutor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #3498db;
-            --background-color: #ecf0f1;
-            --text-color: #2c3e50;
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #f4f7f9;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --text-light: #666666;
             --success-color: #2ecc71;
             --error-color: #e74c3c;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--background-color);
+            font-family: 'Inter', sans-serif;
+            background-color: #BBE9FF;
             margin: 0;
             padding: 0;
             color: var(--text-color);
+            line-height: 1.6;
         }
 
         .header {
-            background-color: var(--primary-color);
+            background: var(--secondary-color);
             color: #fff;
             padding: 20px;
             display: flex;
@@ -119,8 +129,8 @@ error_log("Users: " . print_r($users, true));
 
         .header h1 {
             margin: 0;
-            font-family: 'Montserrat', sans-serif;
             font-size: 24px;
+            font-weight: 600;
         }
 
         .menu {
@@ -134,158 +144,172 @@ error_log("Users: " . print_r($users, true));
             margin-right: 20px;
         }
 
-        .menu li:last-child {
-            margin-right: 0;
-        }
-
         .menu a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            transition: color 0.3s ease;
-        }
+    position: relative;
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    transition: var(--transition);
+    padding: 8px 12px;
+}
 
-        .menu a:hover {
-            color: var(--accent-color);
-        }
+.menu a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #2980b9;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease-out;
+}
 
-        .menu a.active {
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 5px;
-        }
+.menu a:hover::after,
+.menu a.active::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
 
         .menu i {
-            margin-right: 5px;
+            margin-right: 8px;
         }
 
         .logout-btn {
-            background-color: var(--accent-color);
+            background-color: var(--primary-color);
             color: #fff;
             border: none;
-            border-radius: 5px;
-            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            padding: 10px 16px;
             font-size: 14px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
+            transition: var(--transition);
         }
 
         .logout-btn:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
+            background-color: #2980b9;
         }
 
         .container {
-            background: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             padding: 40px;
-            width: 90%;
-            margin: 40px auto;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        h2 {
-            font-size: 20px;
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-item {
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .dashboard-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .dashboard-item h2 {
+            margin: 0 0 16px;
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        .dashboard-item .value {
+            font-size: 36px;
             font-weight: 700;
             color: var(--primary-color);
-            margin-bottom: 24px;
-            text-align: center;
-            font-family: 'Montserrat', sans-serif;
         }
 
-        .dashboard-column {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            margin: 20px 0;
-        }
-        .dashboard-item {
-            flex: 1;
-            min-width: 200px;
-            margin: 10px;
-            padding: 20px;
-            background-color: #f0f0f0;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .dashboard-item h2 {
-            margin: 0;
-            font-size: 18px;
-            color: #333;
-        }
-        .dashboard-item .value {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
         .dashboard-item .description {
             font-size: 14px;
-            color: #666;
+            color: var(--text-light);
+            margin-top: 8px;
         }
 
-        #userTable, #dashboardUserTable {
+        table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        #userTable th, #userTable td,
-        #dashboardUserTable th, #dashboardUserTable td {
-            padding: 12px;
+        th, td {
+            padding: 16px;
             text-align: left;
-            border-bottom: 1px solid #e0e0e0;
         }
 
-        #userTable th, #dashboardUserTable th {
-            background-color: var(--primary-color);
+        th {
+            background-color: var(--secondary-color);
             color: #ffffff;
+            font-weight: 600;
         }
 
-        #userTable tr:nth-child(even),
-        #dashboardUserTable tr:nth-child(even) {
-            background-color: #f8f8f8;
-        }
-
-        #userTable tr:hover,
-        #dashboardUserTable tr:hover {
-            background-color: #f0f0f0;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
+        tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.02);
         }
 
         .action-buttons button {
-            padding: 6px 12px;
+            padding: 8px 16px;
             font-size: 14px;
             border: none;
             border-radius: 20px;
             color: white;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: var(--transition);
         }
 
         .remove-btn {
-            background-color: #EB5B00;
+            background-color: var(--error-color);
         }
 
         .remove-btn:hover {
-            background-color: #C40C0C;
+            background-color: #c0392b;
         }
 
-        #addUserForm, #addAdminForm {
-            background-color: #f8f8f8;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        .form-container {
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 40px;
+        }
+
+        .form-container h2 {
+            margin-top: 0;
+            margin-bottom: 24px;
+            font-size: 20px;
+            color: var(--secondary-color);
         }
 
         .input-group {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         input[type="text"],
@@ -295,25 +319,23 @@ error_log("Users: " . print_r($users, true));
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: var(--border-radius);
             font-size: 14px;
         }
 
         button[type="submit"] {
-            grid-column: 1 / -1;
-            justify-self: start;
-            background-color: var(--accent-color);
+            background-color: var(--primary-color);
             color: #fff;
             border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            padding: 12px 24px;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: var(--transition);
         }
 
         button[type="submit"]:hover {
-            background-color: var(--secondary-color);
+            background-color: #2980b9;
         }
 
         @media (max-width: 768px) {
@@ -323,17 +345,67 @@ error_log("Users: " . print_r($users, true));
             }
 
             .menu {
-                margin-top: 10px;
+                margin-top: 20px;
+                flex-wrap: wrap;
+            }
+
+            .menu li {
                 margin-bottom: 10px;
             }
 
-            .logout-btn {
-                align-self: flex-end;
+            .container {
+                padding: 20px;
             }
+        }
 
-            .input-group {
-                grid-template-columns: 1fr;
-            }
+        .add-user-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 15px;
+            padding: 30px;
+            width: 95%;
+        }
+
+        h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: #2196f3;
+            outline: none;
+        }
+
+        .add-user-btn {
+            background-color: #2196f3;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .add-user-btn:hover {
+            background-color: #1e88e5;
         }
     </style>
 </head>
@@ -342,7 +414,7 @@ error_log("Users: " . print_r($users, true));
         <h1>Typing Tutor Admin Dashboard</h1>
         <nav>
             <ul class="menu">
-                <li><a href="#" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#" data-section="dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="#" data-section="users"><i class="fas fa-users"></i> Users</a></li>
                 <li><a href="#" data-section="admin"><i class="fas fa-user-shield"></i> Admin User</a></li>
             </ul>
@@ -356,8 +428,8 @@ error_log("Users: " . print_r($users, true));
 
     <div class="container">
         <div id="dashboardSection">
-            <h2>Dashboard Overview</h2>
-            <div class="dashboard-column">
+            <h2 class="section-title">Dashboard Overview</h2>
+            <div class="dashboard-grid">
                 <div class="dashboard-item">
                     <h2><i class="fas fa-users"></i> Total Users</h2>
                     <div class="value"><?php echo getUserCount(); ?></div>
@@ -374,96 +446,102 @@ error_log("Users: " . print_r($users, true));
                     <div class="description">Joined last month</div>
                 </div>
             </div>
-            <center>
-                <p>Welcome to the Typing Tutor Admin Dashboard. Here you can manage users, view statistics, and perform administrative tasks.</p>
-            </center>
-            <div id="dashboardUserListSection">
-                <h2>User List</h2>
-                <table id="dashboardUserTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>USERNAME</th>
-                            <th>EMAIL</th>
-                            <th>JOINED DATE</th>
-                            <th>PAYMENT STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dashboardUserList"></tbody>
-                </table>
-            </div>
+
+            <h2 class="section-title">Recent Users</h2>
+            <table id="dashboardUserTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>USERNAME</th>
+                        <th>EMAIL</th>
+                        <th>JOINED DATE</th>
+                    </tr>
+                </thead>
+                <tbody id="dashboardUserList">
+                    <?php foreach ($users as $user): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($user['id']); ?></td>
+                        <td><?php echo htmlspecialchars($user['username']); ?></td>
+                        <td><?php echo htmlspecialchars($user['email']); ?></td>
+                        <td><?php echo date('Y-m-d', strtotime($user['created_at'])); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
 
         <div id="userSection" style="display: none;">
-            <div id="userListSection">
-                <h2>User List</h2>
-                <table id="userTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>USERNAME</th>
-                            <th>EMAIL</th>
-                            <th>JOINED DATE</th>
-                            <th>PAYMENT STATUS</th>
-                            <th>ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userList"></tbody>
-                </table>
-            </div>
+            <h2 class="section-title">User Management</h2>
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>USERNAME</th>
+                        <th>EMAIL</th>
+                        <th>JOINED DATE</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+                <tbody id="userList">
+                    <?php foreach ($users as $user): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($user['id']); ?></td>
+                        <td><?php echo htmlspecialchars($user['username']); ?></td>
+                        <td><?php echo htmlspecialchars($user['email']); ?></td>
+                        <td><?php echo date('Y-m-d', strtotime($user['created_at'])); ?></td>
+                        <td class="action-buttons">
+                            <button class="remove-btn" onclick="deleteUser(<?php echo $user['id']; ?>)"><i class="fas fa-trash"></i> REMOVE</button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
             
-            <div id="userDetailsSection" style="display: none;">
-                <!-- User details will be dynamically inserted here -->
-            </div>
             
-            <div id="addUserSection">
-                <h2>Add User</h2>
-                <form id="addUserForm">
-                    <div class="input-group">
-                        <input type="text" id="newUsername" placeholder="Enter username" required>
-                        <input type="email" id="newEmail" placeholder="Enter email" required>
-                        <input type="password" id="newPassword" placeholder="Enter password" required>
-                        <input type="tel" id="newPhone" placeholder="Enter phone number" required>
-                        <button type="submit"><i class="fas fa-plus"></i> Add User</button>
-                    </div>
-                </form>
+            <h2 class="section-title">Add User</h2>
+            <div class="add-user-container">
+        <form id="addUserForm">
+            <div class="input-group">
+                <input type="text" id="newUsername" placeholder="Enter username" required>
             </div>
+            <div class="input-group">
+                <input type="email" id="newEmail" placeholder="Enter email" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="newPassword" placeholder="Enter password" required>
+            </div>
+            <div class="input-group">
+                <input type="tel" id="newPhone" placeholder="Enter phone number" required>
+            </div>
+            <button type="submit" class="add-user-btn">Add User</button>
+        </form>
+    </div>
         </div>
 
         <div id="addAdminSection" style="display: none;">
-            <h2>Add Admin User</h2>
+            <h2 class="section-title">Add Admin User</h2>
+            <div class="form-container">
             <form id="addAdminForm">
                 <div class="input-group">
                     <input type="text" id="newAdminUsername" placeholder="Enter admin username" required>
                     <input type="password" id="newAdminPassword" placeholder="Enter admin password" required>
-                    <button type="submit"><i class="fas fa-plus"></i> Add Admin</button>
                 </div>
+                <button type="submit"><i class="fas fa-plus"></i> Add Admin</button>
             </form>
         </div>
     </div>
+</div>
 
-    <script>
-    let users = [];
-    try {
-        const usersJSON = '<?php echo json_encode($users); ?>';
-        console.log("Raw JSON:", usersJSON);
-        users = JSON.parse(usersJSON);
-        console.log("Parsed users:", users);
-        if (!Array.isArray(users)) {
-            throw new Error('Invalid user data');
-        }
-    } catch (error) {
-        console.error('Error parsing user data:', error);
-        console.error('Raw JSON:', '<?php echo json_encode($users); ?>');
-        alert('There was an error loading user data. Please check the console for more information.');
-    }
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let users = <?php echo json_encode($users); ?>;
 
     function renderUserList() {
         const userList = document.getElementById('userList');
         userList.innerHTML = '';
         if (users.length === 0) {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td colspan="6" style="text-align: center; font-style: italic; color: #777;">There are no users right now</td>`;
+            tr.innerHTML = `<td colspan="5" style="text-align: center; font-style: italic; color: #777;">There are no users right now</td>`;
             userList.appendChild(tr);
         } else {
             users.forEach(user => {
@@ -472,8 +550,7 @@ error_log("Users: " . print_r($users, true));
                     <td>${user.id}</td>
                     <td>${user.username}</td>
                     <td>${user.email}</td>
-                    <td>${new Date().toLocaleDateString()}</td>
-                    <td>Paid</td>
+                    <td>${new Date(user.created_at).toLocaleDateString()}</td>
                     <td class="action-buttons">
                         <button class="remove-btn" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i> REMOVE</button>
                     </td>
@@ -483,47 +560,26 @@ error_log("Users: " . print_r($users, true));
         }
     }
 
-    function renderDashboardUserList() {
-        const dashboardUserList = document.getElementById('dashboardUserList');
-        dashboardUserList.innerHTML = '';
-        
-        if (users.length === 0) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td colspan="5" style="text-align: center; font-style: italic; color: #777;">There are no users right now</td>`;
-            dashboardUserList.appendChild(tr);
-        } else {
-            users.forEach(user => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.username}</td>
-                    <td>${user.email}</td>
-                    <td>${new Date().toLocaleDateString()}</td>
-                    <td>Paid</td>
-                `;
-                dashboardUserList.appendChild(tr);
+    function deleteUser(userId) {
+        if (confirm('Are you sure you want to delete this user?')) {
+            fetch('delete_user.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'id=' + userId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    users = users.filter(user => user.id !== userId);
+                    renderUserList();
+                    alert('User deleted successfully');
+                } else {
+                    alert('Failed to delete user');
+                }
             });
         }
-    }
-
-    function deleteUser(userId) {
-        fetch('delete_user.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'id=' + userId
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                users = users.filter(user => user.id !== userId);
-                renderUserList();
-                renderDashboardUserList();
-            } else {
-                alert('Failed to delete user');
-            }
-        });
     }
 
     function addUser(username, email, password, phone) {
@@ -540,9 +596,8 @@ error_log("Users: " . print_r($users, true));
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                users.push({id: data.id, username: username, email: email, phone: phone});
+                users.push({id: data.id, username: username, email: email, created_at: new Date().toISOString()});
                 renderUserList();
-                renderDashboardUserList();
                 alert('User added successfully');
             } else {
                 alert('Failed to add user');
@@ -551,19 +606,17 @@ error_log("Users: " . print_r($users, true));
     }
 
     document.getElementById('addUserForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const newUsername = document.getElementById('newUsername').value;
-        const newEmail = document.getElementById('newEmail').value;
-        const newPassword = document.getElementById('newPassword').value;
-        const newPhone = document.getElementById('newPhone').value;
-        if (newUsername && newEmail && newPassword && newPhone) {
-            addUser(newUsername, newEmail, newPassword, newPhone);
-            document.getElementById('newUsername').value = '';
-            document.getElementById('newEmail').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('newPhone').value = '';
-        }
-    });
+            e.preventDefault();
+            const newUsername = document.getElementById('newUsername').value;
+            const newEmail = document.getElementById('newEmail').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const newPhone = document.getElementById('newPhone').value;
+            if (newUsername && newEmail && newPassword && newPhone) {
+                // Here you would typically call a function to add the user
+                console.log('Adding user:', { newUsername, newEmail, newPassword, newPhone });
+                this.reset();
+            }
+        });
 
     function addAdminUser(username, password) {
         fetch('add_admin.php', {
@@ -589,43 +642,44 @@ error_log("Users: " . print_r($users, true));
         const newAdminPassword = document.getElementById('newAdminPassword').value;
         if (newAdminUsername && newAdminPassword) {
             addAdminUser(newAdminUsername, newAdminPassword);
-            document.getElementById('newAdminUsername').value = '';
-            document.getElementById('newAdminPassword').value = '';
+            this.reset();
         }
     });
 
-    document.querySelectorAll('.menu a').forEach(link => {
+    // Navigation functionality
+    const menuLinks = document.querySelectorAll('.menu a');
+    const sections = {
+        dashboard: document.getElementById('dashboardSection'),
+        users: document.getElementById('userSection'),
+        admin: document.getElementById('addAdminSection')
+    };
+
+    function showSection(sectionId) {
+        for (let key in sections) {
+            sections[key].style.display = key === sectionId ? 'block' : 'none';
+        }
+    }
+
+    menuLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            const section = this.getAttribute('data-section');
+            const sectionId = this.getAttribute('data-section');
             
-            // Remove 'active' class from all links
-            document.querySelectorAll('.menu a').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Add 'active' class to the clicked link
+            menuLinks.forEach(item => item.classList.remove('active'));
             this.classList.add('active');
             
-            document.getElementById('dashboardSection').style.display = 'none';
-            document.getElementById('userSection').style.display = 'none';
-            document.getElementById('addAdminSection').style.display = 'none';
+            showSection(sectionId);
             
-            if (section === 'dashboard') {
-                document.getElementById('dashboardSection').style.display = 'block';
-                renderDashboardUserList();
-            } else if (section === 'users') {
-                document.getElementById('userSection').style.display = 'block';
+            if (sectionId === 'users') {
                 renderUserList();
-            } else if (section === 'admin') {
-                document.getElementById('addAdminSection').style.display = 'block';
             }
         });
     });
 
     // Initialize the dashboard view
-    renderDashboardUserList();
-    document.querySelector('.menu a[data-section="dashboard"]').classList.add('active');
-    </script>
+    showSection('dashboard');
+    menuLinks[0].classList.add('active');
+});
+</script>
 </body>
 </html>
