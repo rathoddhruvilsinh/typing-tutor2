@@ -19,6 +19,23 @@ function getUserCount() {
     return $row['user_count'];
 }
 
+function getAdminUsers() {
+    global $con;
+    $query = "SELECT id, username, created_at FROM admin_users ORDER BY id ASC";
+    $result = mysqli_query($con, $query);
+    if (!$result) {
+        error_log("MySQL Error in getAdminUsers: " . mysqli_error($con));
+        return [];
+    }
+    $admins = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $admins[] = $row;
+    }
+    return $admins;
+}
+
+$adminUsers = getAdminUsers();
+
 function getAdminCount() {
     global $con;
     $query = "SELECT COUNT(*) as admin_count FROM admin_users";
@@ -291,11 +308,11 @@ $users = getUsers();
         input[type="email"],
         input[type="password"],
         input[type="tel"] {
-            width: 100%;
+            width: 90%;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: var(--border-radius);
-            font-size: 14px;
+            font-size: 16px;
         }
 
         button[type="submit"] {
@@ -336,7 +353,7 @@ $users = getUsers();
 </head>
 <body>
     <header class="header">
-        <h1>Typing Tutor Admin Dashboard</h1>
+        <h1><i class="fas fa-keyboard"></i> Typing Tutor Admin Dashboard</h1>
         <nav>
             <ul class="menu">
                 <li><a href="#" data-section="dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
@@ -353,7 +370,7 @@ $users = getUsers();
 
     <div class="container">
         <div id="dashboardSection">
-            <h2 class="section-title">Dashboard Overview</h2>
+            <h2 class="section-title"><i class="fas fa-chart-line"></i> Dashboard Overview</h2>
             <div class="dashboard-grid">
                 <div class="dashboard-item">
                     <h2><i class="fas fa-users"></i> Total Users</h2>
@@ -366,20 +383,20 @@ $users = getUsers();
                     <div class="description">Total admin accounts</div>
                 </div>
                 <div class="dashboard-item">
-                    <h2><i class="fas fa-user-check"></i> New Users</h2>
+                    <h2><i class="fas fa-user-plus"></i> New Users</h2>
                     <div class="value"><?php echo getNewUserCount(); ?></div>
                     <div class="description">Users joined in the last month</div>
                 </div>
             </div>
 
-            <h2 class="section-title">Recent Users</h2>
+            <h2 class="section-title"><i class="fas fa-clock"></i> Recent Users</h2>
             <table id="dashboardUserTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>USERNAME</th>
-                        <th>EMAIL</th>
-                        <th>JOINED DATE</th>
+                        <th><i class="fas fa-hashtag"></i> ID</th>
+                        <th><i class="fas fa-user"></i> USERNAME</th>
+                        <th><i class="fas fa-envelope"></i> EMAIL</th>
+                        <th><i class="fas fa-calendar-alt"></i> JOINED DATE</th>
                     </tr>
                 </thead>
                 <tbody id="dashboardUserList">
@@ -396,15 +413,15 @@ $users = getUsers();
         </div>
 
         <div id="userSection" style="display: none;">
-            <h2 class="section-title">User Management</h2>
+            <h2 class="section-title"><i class="fas fa-users-cog"></i> User Management</h2>
             <table id="userTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>USERNAME</th>
-                        <th>EMAIL</th>
-                        <th>JOINED DATE</th>
-                        <th>ACTION</th>
+                        <th><i class="fas fa-hashtag"></i> ID</th>
+                        <th><i class="fas fa-user"></i> USERNAME</th>
+                        <th><i class="fas fa-envelope"></i> EMAIL</th>
+                        <th><i class="fas fa-calendar-alt"></i> JOINED DATE</th>
+                        <th><i class="fas fa-cogs"></i> ACTION</th>
                     </tr>
                 </thead>
                 <tbody id="userList">
@@ -415,14 +432,14 @@ $users = getUsers();
                         <td><?php echo htmlspecialchars($user['email']); ?></td>
                         <td><?php echo date('Y-m-d', strtotime($user['created_at'])); ?></td>
                         <td class="action-buttons">
-                            <button class="remove-btn"><i class="fas fa-trash"></i> REMOVE</button>
+                            <button class="remove-btn"><i class="fas fa-trash-alt"></i> REMOVE</button>
                         </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
             
-            <h2 class="section-title">Add User</h2>
+            <h2 class="section-title"><i class="fas fa-user-plus"></i> Add User</h2>
             <div class="form-container">
                 <form id="addUserForm">
                     <div class="input-group">
@@ -433,37 +450,43 @@ $users = getUsers();
                         <input type="password" id="newPassword" placeholder="Enter password" required>
                         <input type="tel" id="newPhone" placeholder="Enter phone number" required>
                     </div>
-                    <button type="submit">Add User</button>
+                    <button type="submit"><i class="fas fa-plus-circle"></i> Add User</button>
                 </form>
             </div>
         </div>
 
         <div id="addAdminSection" style="display: none;">
-            <h2 class="section-title">Admin User Management</h2>
+            <h3 class="sub-section-title"><i class="fas fa-user-shield"></i> Current Admin Users</h3>
+            <table id="adminTable">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-hashtag"></i> ID</th>
+                        <th><i class="fas fa-user"></i> Username</th>
+                        <th><i class="fas fa-calendar-alt"></i> Joined Date</th>
+                    </tr>
+                </thead>
+                <tbody id="adminList">
+                <?php foreach ($adminUsers as $admin): ?>
+                <tr data-admin-id="<?php echo htmlspecialchars($admin['id']); ?>">
+                    <td><?php echo htmlspecialchars($admin['id']); ?></td>
+                    <td><?php echo htmlspecialchars($admin['username']); ?></td>
+                    <td><?php echo date('Y-m-d', strtotime($admin['created_at'])); ?></td>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <h2 class="section-title"><i class="fas fa-user-plus"></i> Admin User Management</h2>
             <div class="form-container">
-                <h3>Add Admin User</h3>
+                <h3><i class="fas fa-user-shield"></i> Add Admin User</h3>
                 <form id="addAdminForm">
                     <div class="input-group">
                         <input type="text" id="newAdminUsername" placeholder="Enter admin username" required>
                         <input type="password" id="newAdminPassword" placeholder="Enter admin password" required>
                     </div>
-                    <button type="submit"><i class="fas fa-plus"></i> Add Admin</button>
+                    <button type="submit"><i class="fas fa-plus-circle"></i> Add Admin</button>
                 </form>
             </div>
-
-            <h3 class="sub-section-title">Current Admin Users</h3>
-            <table id="adminTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="adminList">
-                    <!-- Admin users will be populated here -->
-                </tbody>
-            </table>
         </div>
     </div>
 
