@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     die(json_encode(['success' => false, 'message' => 'Unauthorized']));
@@ -6,25 +9,44 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 
 require_once 'db.php';
 
-if (isset($_POST['username']) && isset($_POST['email']) && isset($_POST['password'])) {
+$requiredFields = ['username', 'email', 'password'];
+$missingFields = [];
+
+foreach ($requiredFields as $field) {
+    if (!isset($_POST[$field]) || empty($_POST[$field])) {
+        $missingFields[] = $field;
+    }
+}
+
+if (empty($missingFields)) {
     $username = mysqli_real_escape_string($con, $_POST['username']);
     $email = mysqli_real_escape_string($con, $_POST['email']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     
     $query = "INSERT INTO users (username, email, password, user_role) VALUES (?, ?, ?, 'user')";
     $stmt = mysqli_prepare($con, $query);
+    
+    if ($stmt === false) {
+        die(json_encode(['success' => false, 'message' => 'Prepare statement failed: ' . mysqli_error($con)]));
+    }
+    
     mysqli_stmt_bind_param($stmt, "sss", $username, $email, $password);
     
     if (mysqli_stmt_execute($stmt)) {
         $newUserId = mysqli_insert_id($con);
         echo json_encode(['success' => true, 'id' => $newUserId]);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to add user']);
+        echo json_encode(['success' => false, 'message' => 'Failed to add user: ' . mysqli_stmt_error($stmt)]);
     }
     
     mysqli_stmt_close($stmt);
 } else {
-    echo json_encode(['success' => false, 'message' => 'Invalid request']);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Invalid request: Missing required fields', 
+        'missingFields' => $missingFields,
+        'receivedData' => $_POST
+    ]);
 }
 ?>
 

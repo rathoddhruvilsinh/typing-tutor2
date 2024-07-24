@@ -262,6 +262,7 @@ $users = getUsers();
             color: white;
             cursor: pointer;
             transition: var(--transition);
+            margin-right: 5px;
         }
 
         .remove-btn {
@@ -405,7 +406,7 @@ $users = getUsers();
                         <td><?php echo htmlspecialchars($user['id']); ?></td>
                         <td><?php echo htmlspecialchars($user['username']); ?></td>
                         <td><?php echo htmlspecialchars($user['email']); ?></td>
-                        <td><?php echo date('Y-m-d', strtotime($user['created_at'])); ?></td>
+                        <td><?php echo date('d-m-Y', strtotime($user['created_at'])); ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -430,7 +431,7 @@ $users = getUsers();
                         <td><?php echo htmlspecialchars($user['id']); ?></td>
                         <td><?php echo htmlspecialchars($user['username']); ?></td>
                         <td><?php echo htmlspecialchars($user['email']); ?></td>
-                        <td><?php echo date('Y-m-d', strtotime($user['created_at'])); ?></td>
+                        <td><?php echo date('d-m-Y', strtotime($user['created_at'])); ?></td>
                         <td class="action-buttons">
                             <button class="remove-btn"><i class="fas fa-trash-alt"></i> REMOVE</button>
                         </td>
@@ -470,7 +471,7 @@ $users = getUsers();
                 <tr data-admin-id="<?php echo htmlspecialchars($admin['id']); ?>">
                     <td><?php echo htmlspecialchars($admin['id']); ?></td>
                     <td><?php echo htmlspecialchars($admin['username']); ?></td>
-                    <td><?php echo date('Y-m-d', strtotime($admin['created_at'])); ?></td>
+                    <td><?php echo date('d-m-Y', strtotime($admin['created_at'])); ?></td>
                 </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -495,7 +496,7 @@ $users = getUsers();
         const userTable = document.getElementById('userTable');
 
         userTable.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-btn') || e.target.closest('.remove-btn')) {
+             if (e.target.classList.contains('remove-btn') || e.target.closest('.remove-btn')) {
                 const row = e.target.closest('tr');
                 const userId = row.dataset.userId;
                 deleteUser(userId);
